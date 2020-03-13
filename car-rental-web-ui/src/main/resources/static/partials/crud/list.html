@@ -1,0 +1,14 @@
+<div>
+	<div class="jumbotron">
+		<div class="row">
+			<h1 class="col-10">{{title}}</h1>
+			<a ng-controller="UtilCtrl" ng-href="#!{{$location.path()}}/create" class="col-2">
+				<button class="btn btn-primary">Create new</button>
+			</a>
+			<div ng-controller="UtilCtrl" class="w-100">
+				<div class="alert alert-primary" role="alert"  ng-repeat="message in messages track by $index">{{message}}</div>  		
+			</div>			
+		</div>
+	</div>
+    <table datatable="" dt-options="vm.dtOptions" dt-columns="vm.dtColumns" class="row-border hover" dt-instance="vm.dtInstance"></table>
+</div>

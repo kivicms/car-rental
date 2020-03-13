@@ -1,0 +1,75 @@
+version: "3.1"
+
+services:
+  nginx-proxy:
+    image: car-rental-nginx:base
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    depends_on:
+      - car-rental-web-ui  
+      - car-rental-tracking 
+  db:
+    image: mysql:5.7.22
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "0123456789"
+    ports: 
+    - "3307:3306"
+    volumes:
+      - ./db/data/:/var/lib/mysql
+      - ./db/schema:/docker-entrypoint-initdb.d
+  redis:
+    image: redis
+    restart: always
+    ports: 
+    - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  car-rental-web-ui:
+    image: car-rental-web-ui:base
+    environment:
+      DB_USER: "root"
+      DB_PASS: "0123456789"
+      DB_URL: "jdbc:mysql://db:3306/car_rental?useUnicode=yes&characterEncoding=UTF-8"
+      REDIS_URL: redis://redis:6379
+      VIRTUAL_HOST: car-rental-web-ui
+      VIRTUAL_HOST_LOCATION: "/"
+    ports:
+      - "8080:8080"
+    deploy:
+      replicas: 1
+    depends_on:
+      - redis
+      - db  
+  car-rental-tracking:
+    image: car-rental-tracking:base
+    environment:
+      DB_USER: "root"
+      DB_PASS: "0123456789"
+      DB_URL: "jdbc:mysql://db:3306/car_rental_tracking?useUnicode=yes&characterEncoding=UTF-8"
+      REDIS_URL: redis://redis:6379
+      VIRTUAL_HOST: car-rental-tracking
+      VIRTUAL_HOST_LOCATION: "^~ /api/point/write"
+    ports:
+      - "8090:8090"
+    deploy:
+      replicas: 1
+    depends_on:
+      - redis
+      - rabbitmq
+  ci:
+    image: jenkinsci/blueocean
+    user: root
+    restart: always
+    ports: 
+    - "8081:8080"
+    - "50000:50000"
+    volumes:
+      - ./ci/data/:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock

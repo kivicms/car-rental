@@ -1,0 +1,24 @@
+<div class="jumbotron">
+		<div ng-controller="UtilCtrl">
+			<div class="alert alert-primary" role="alert"  ng-repeat="message in messages track by $index">{{message}}</div>
+		</div>
+		<form ng-submit="saveFormSubmit()">
+		<div class="form-group" ng-repeat="(key,element) in form_model.columns" ng-switch="element.type">
+			<input ng-if="!element.controller" class="form-control" id="e-{{key}}" placeholder="{{element.title}}" ng-model="form_model.columns[key].value" ng-switch-when="date" uib-datepicker-popup="yyyy-MM-dd hh:mm" is-open="element.opened" ng-click="element.opened=!element.opened" datepicker-options="element.options">
+		    <input ng-if="!element.controller" type="text" class="form-control" id="e-{{key}}" placeholder="{{element.title}}" ng-model="form_model.columns[key].value" ng-switch-default>
+			<div ng-if="element.controller" class="card">
+				<button ng-click="selectEntity(element.controller,$event,form_model.columns[key])" ng-if="!element.value" type="button" class="btn btn-light">{{element.title}} (Select)</button>
+				<div ng-if="element.value" class="card" >
+					  <div class="card-body">
+					    <h5 class="card-title text-capitalize">{{element.controller}}</h5>
+					    <h6 class="card-subtitle mb-2 text-muted">Details:</h6>
+					    <p class="card-text" ng-repeat="(propKey,propVal) in element.value">{{propVal}}</p>
+					    <button type="button" class="btn btn-link card-link" ng-click="element.value=null">Remove</button>
+					    <button type="button" class="btn btn-link card-link" ng-click="selectEntity(element.controller,$event,form_model.columns[key])">Change</button>
+					  </div>
+				</div>
+			</div>
+  		</div>
+  		<button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+</div>
